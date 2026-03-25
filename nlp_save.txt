@@ -1,0 +1,173 @@
+import pandas as pd
+from torch.utils.data import Dataset
+
+class GoogleDataset(Dataset):
+    def __init__(self, file_path):
+        # Initialize an empty list to store data
+        self.data = []
+
+        # 读取CSV文件
+        df = pd.read_csv(file_path[0], encoding="utf-8")
+
+        # 获取所需的列
+        columns_data = df.loc[:, ['text', 'admiration', 'amusement', 'anger', 'annoyance', 'approval', 
+                                  'caring', 'confusion', 'curiosity', 'desire', 'disappointment', 
+                                  'disapproval', 'disgust', 'embarrassment', 'excitement', 'fear', 
+                                  'gratitude', 'grief', 'joy', 'love', 'nervousness', 'optimism', 
+                                  'pride', 'realization', 'relief', 'remorse', 'sadness', 'surprise', 
+                                  'neutral']]
+
+        # 获取从第二列开始的所有列名
+        emotion_columns = columns_data.columns[1:]
+
+        # 对这些列进行转换
+        columns_data[emotion_columns] = columns_data[emotion_columns].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+        # 逐行处理数据
+        for index, row in columns_data.iterrows():
+            text = row['text']
+            # 跳过头部行
+            if text == 'text':
+                continue
+
+            # 提取每一列的情感数据（从第2列开始）
+            emotions = row[emotion_columns].tolist()
+
+            # 将数据按元组形式添加到数据列表中
+            self.data.append((text, emotions))
+
+          # print(self.data[:10])  # 打印前10个元素
+        
+        # If there’s a second file, load it as well
+        if len(file_path) > 1:
+            data = pd.read_csv(file_path[1], skiprows=1, sep=',', names=['text', 'admiration', 'amusement', 'anger', 'annoyance', 'approval', 
+                                   'caring', 'confusion', 'curiosity', 'desire', 'disappointment', 
+                                   'disapproval', 'disgust', 'embarrassment', 'excitement', 'fear', 
+                                   'gratitude', 'grief', 'joy', 'love', 'nervousness', 'optimism', 
+                                   'pride', 'realization', 'relief', 'remorse', 'sadness', 'surprise', 
+                                   'neutral'], encoding='utf-8')
+            emotion_columns_1 = data.columns[1:]  # 忽略 'text' 列，只处理情感数据
+
+             # 对情感列进行数值转换
+            data[emotion_columns_1] = data[emotion_columns_1].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+             # 逐行处理数据
+            for index, row in df.iterrows():
+                text1 = row['text']
+                emotions1 = row[emotion_columns_1].tolist()
+
+             # 将数据按元组形式添加到数据列表中
+                self.data.append((text1, emotions1))
+
+        print(self.data[:10])  # 打印前10个元素
+        print(len(self.data))  # 打印前10个元素
+        
+    # Return the length of the dataset
+    def __len__(self):
+        return len(self.data)
+
+    # Return the item at the given index
+    def __getitem__(self, idx):
+        return self.data[idx]
+#使用示例
+# train_data = GoogleDataset(["goemotions_1.csv"])
+train_data = GoogleDataset(["goemotions_1.csv", "goemotions_2.csv"])  # Assuming there’s a train file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------
+
+
+
+import pandas as pd
+from torch.utils.data import Dataset
+
+class GoogleDataset(Dataset):
+    def __init__(self, file_path):
+        # Initialize an empty list to store data
+        self.data = []
+
+        # 读取第一个CSV文件
+        df = pd.read_csv(file_path[0], encoding="utf-8")
+
+        # 获取所需的列
+        columns_data = df.loc[:, ['text', 'admiration', 'amusement', 'anger', 'annoyance', 'approval', 
+                                  'caring', 'confusion', 'curiosity', 'desire', 'disappointment', 
+                                  'disapproval', 'disgust', 'embarrassment', 'excitement', 'fear', 
+                                  'gratitude', 'grief', 'joy', 'love', 'nervousness', 'optimism', 
+                                  'pride', 'realization', 'relief', 'remorse', 'sadness', 'surprise', 
+                                  'neutral']]
+
+        # 获取情感列
+        emotion_columns = columns_data.columns[1:]
+
+        # 对这些列进行转换
+        columns_data[emotion_columns] = columns_data[emotion_columns].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+        # 逐行处理数据
+        for index, row in columns_data.iterrows():
+            text = row['text']
+            if text == 'text':  # 跳过头部行
+                continue
+
+            # 提取每一列的情感数据（从第2列开始）
+            emotions = row[emotion_columns].tolist()
+
+            # 找到第一个为 1 的情感索引，作为标签
+            label = next((i for i, emotion in enumerate(emotions) if emotion == 1), -1)
+
+            # 将数据按元组形式添加到数据列表中，(text, label, emotions)
+            self.data.append((text, label, emotions))
+
+        # 如果有第二个文件，加载第二个文件的数据
+        if len(file_path) > 1:
+            data = pd.read_csv(file_path[1], skiprows=1, sep=',', names=['text', 'admiration', 'amusement', 'anger', 'annoyance', 'approval', 
+                                   'caring', 'confusion', 'curiosity', 'desire', 'disappointment', 
+                                   'disapproval', 'disgust', 'embarrassment', 'excitement', 'fear', 
+                                   'gratitude', 'grief', 'joy', 'love', 'nervousness', 'optimism', 
+                                   'pride', 'realization', 'relief', 'remorse', 'sadness', 'surprise', 
+                                   'neutral'], encoding='utf-8')
+            emotion_columns_1 = data.columns[1:]
+
+            # 对情感列进行数值转换
+            data[emotion_columns_1] = data[emotion_columns_1].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+            # 逐行处理数据
+            for index, row in data.iterrows():
+                text1 = row['text']
+                emotions1 = row[emotion_columns_1].tolist()
+
+                # 找到第一个为 1 的情感索引，作为标签
+                label1 = next((i for i, emotion in enumerate(emotions1) if emotion == 1), -1)
+
+                # 将数据按元组形式添加到数据列表中，(text, label, emotions)
+                self.data.append((text1, label1, emotions1))
+
+        # 打印前10个元素，调试用
+        print(self.data[:10])  # 打印前10个元素
+        print(len(self.data))  # 打印数据集的长度
+
+    # Return the length of the dataset
+    def __len__(self):
+        return len(self.data)
+
+    # Return the item at the given index
+    def __getitem__(self, idx):
+        text, label, emotions = self.data[idx]
+        return text, label, emotions
+
+
+# 使用示例
+# train_data = GoogleDataset(["goemotions_1.csv"])
+train_data = GoogleDataset(["goemotions_1.csv", "goemotions_2.csv"])  # Assuming there’s a train file
