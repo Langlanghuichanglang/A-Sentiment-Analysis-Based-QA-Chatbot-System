@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>心理支持辅助 Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="profile-panel" aria-label="用户偏好">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">AI</div>
+          <div>
+            <h1>心理支持辅助 Agent</h1>
+            <p>课程演示版 · 非医疗诊断</p>
+          </div>
+        </div>
+
+        <section class="control-section">
+          <h2>沟通偏好</h2>
+          <label for="mbti">MBTI</label>
+          <select id="mbti">
+            <option value="unknown">暂不选择</option>
+            <option>INTJ</option>
+            <option>INTP</option>
+            <option>ENTJ</option>
+            <option>ENTP</option>
+            <option>INFJ</option>
+            <option>INFP</option>
+            <option>ENFJ</option>
+            <option>ENFP</option>
+            <option>ISTJ</option>
+            <option>ISFJ</option>
+            <option>ESTJ</option>
+            <option>ESFJ</option>
+            <option>ISTP</option>
+            <option>ISFP</option>
+            <option>ESTP</option>
+            <option>ESFP</option>
+          </select>
+
+          <label for="style">回应方式</label>
+          <select id="style">
+            <option value="balanced">平衡</option>
+            <option value="structured">更结构化</option>
+            <option value="gentle">更温和</option>
+            <option value="practical">更具体</option>
+            <option value="reflective">更开放探索</option>
+          </select>
+
+          <label class="checkbox-row">
+            <input id="memory-enabled" type="checkbox" />
+            <span>允许保存脱敏摘要记忆</span>
+          </label>
+        </section>
+
+        <section class="control-section">
+          <h2>安全边界</h2>
+          <p class="small-text">
+            本工具用于心理支持、自我观察与课程演示，不提供诊断、处方或治疗决策。
+          </p>
+          <button id="crisis-button" class="secondary-button" type="button">危机资源</button>
+          <button id="reset-button" class="ghost-button" type="button">清空会话</button>
+        </section>
+      </aside>
+
+      <section class="chat-panel" aria-label="聊天区域">
+        <header class="chat-header">
+          <div>
+            <p class="eyebrow">Safety-aware chatbox</p>
+            <h2>聊聊最近发生了什么</h2>
+          </div>
+          <button id="report-button" class="primary-button" type="button">生成筛查报告</button>
+        </header>
+
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <form id="chat-form" class="composer">
+          <textarea
+            id="message-input"
+            name="message"
+            rows="3"
+            placeholder="比如：最近压力很大，晚上总是睡不好。"
+            required
+          ></textarea>
+          <button class="send-button" type="submit" aria-label="发送消息">发送</button>
+        </form>
+      </section>
+
+      <aside class="report-panel" aria-label="报告区域">
+        <header>
+          <p class="eyebrow">Self-observation report</p>
+          <h2>心理筛查与自我观察报告</h2>
+        </header>
+        <div id="report-content" class="report-content">
+          <p class="empty-state">
+            对话两轮以上后可生成报告。报告会总结情绪主题、压力源、风险等级、量表建议和可尝试练习。
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

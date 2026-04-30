@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cbt-thought-record",
+    "title": "CBT 自动想法记录",
+    "topic": "cbt",
+    "source": "curated_demo_knowledge",
+    "summary": "把情绪强度、触发事件、自动想法、支持证据、反对证据和更平衡想法分开记录，帮助用户从反刍进入可观察的结构。",
+    "keywords": ["压力", "自责", "失败", "担心", "想法", "焦虑", "低落"],
+    "risk_level_allowed": ["normal", "elevated"]
+  },
+  {
+    "id": "grounding-54321",
+    "title": "5-4-3-2-1 Grounding",
+    "topic": "grounding",
+    "source": "curated_demo_knowledge",
+    "summary": "通过列出 5 个看到的东西、4 个触碰到的东西、3 个听到的声音、2 个闻到的气味和 1 个味觉或呼吸感受，把注意力带回当下。",
+    "keywords": ["焦虑", "慌", "紧张", "呼吸", "失眠", "崩溃"],
+    "risk_level_allowed": ["normal", "elevated"]
+  },
+  {
+    "id": "sleep-routine",
+    "title": "睡眠节律自助建议",
+    "topic": "sleep",
+    "source": "curated_demo_knowledge",
+    "summary": "优先稳定起床时间，睡前减少高刺激内容，把床和清醒反刍解耦；如果长期严重失眠，建议寻求专业评估。",
+    "keywords": ["睡眠", "失眠", "睡不着", "早醒", "熬夜"],
+    "risk_level_allowed": ["normal", "elevated"]
+  },
+  {
+    "id": "crisis-basic",
+    "title": "危机安全步骤",
+    "topic": "crisis",
+    "source": "curated_demo_knowledge",
+    "summary": "当存在立即危险时，优先联系当地急救服务、学校心理中心或可信赖的人，并把可能伤害自己的物品移远。",
+    "keywords": ["自杀", "自残", "伤害自己", "不想活", "危险"],
+    "risk_level_allowed": ["crisis"]
+  }
+]

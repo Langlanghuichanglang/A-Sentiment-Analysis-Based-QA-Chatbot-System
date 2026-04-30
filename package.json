@@ -1,0 +1,15 @@
+{
+  "name": "mental-support-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Course project MVP for a safety-aware mental support chatbox agent with RAG, tools, report generation, and LangGraph-ready architecture.",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "prepare:finetune": "node scripts/prepare_finetune_dataset.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

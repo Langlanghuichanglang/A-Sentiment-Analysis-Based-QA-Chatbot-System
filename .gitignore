@@ -1,0 +1,11 @@
+node_modules/
+.env
+.git/
+.git-local/
+__pycache__/
+*.pyc
+*.pyc.*
+.venv/
+dist/
+build/
+.DS_Store
