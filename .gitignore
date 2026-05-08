@@ -1,0 +1,10 @@
+﻿.venv/
+.venv-llm/
+node_modules/
+__pycache__/
+*.pyc
+.env
+checkpoint-*/
+data/*.csv
+mbti_1.csv/
+fine_tune/local_models/

@@ -1,0 +1,8 @@
+{
+  "base_model": "Qwen/Qwen3-0.6B",
+  "data": "fine_tune\\public\\mbti_legacy_demo_train.jsonl",
+  "examples": 128,
+  "max_seq_length": 512,
+  "epochs": 3.0,
+  "adapter_path": "fine_tune\\local_llm\\mbti_legacy_demo_lora"
+}

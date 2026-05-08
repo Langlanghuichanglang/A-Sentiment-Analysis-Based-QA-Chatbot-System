@@ -1,0 +1,20 @@
+{
+  "name": "hhl-analysis-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Generative sentiment and MBTI analysis tools using Qwen3-0.6B LoRA adapters.",
+  "type": "commonjs",
+  "scripts": {
+    "start:api": ".venv-llm\\Scripts\\python.exe -m uvicorn backend.app.main:app --reload --port 8000",
+    "prepare:sentiment:legacy": ".venv-llm\\Scripts\\python.exe -X utf8 scripts\\prepare_legacy_sentiment_demo_dataset.py",
+    "train:sentiment:legacy": ".venv-llm\\Scripts\\python.exe -X utf8 scripts\\train_qwen_lora.py --data fine_tune/public/sentiment_legacy_demo_train.jsonl --output fine_tune/local_llm/sentiment_legacy_demo_lora --limit 0 --epochs 3 --max-seq-length 512 --save-steps 100 --logging-steps 10",
+    "test:sentiment:legacy": ".venv-llm\\Scripts\\python.exe -X utf8 scripts\\test_qwen_lora.py --adapter fine_tune/local_llm/sentiment_legacy_demo_lora --task sentiment",
+    "test:sentiment:generative": ".venv-llm\\Scripts\\python.exe -X utf8 scripts\\test_qwen_lora.py --adapter fine_tune/local_llm/sentiment_legacy_demo_lora --task sentiment",
+    "prepare:mbti:legacy": ".venv-llm\\Scripts\\python.exe -X utf8 scripts\\prepare_legacy_mbti_demo_dataset.py",
+    "train:mbti:legacy": ".venv-llm\\Scripts\\python.exe -X utf8 scripts\\train_qwen_lora.py --data fine_tune/public/mbti_legacy_demo_train.jsonl --output fine_tune/local_llm/mbti_legacy_demo_lora --limit 0 --epochs 3 --max-seq-length 512 --save-steps 100 --logging-steps 10",
+    "test:mbti:legacy": ".venv-llm\\Scripts\\python.exe -X utf8 scripts\\test_qwen_lora.py --adapter fine_tune/local_llm/mbti_legacy_demo_lora --task mbti"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
