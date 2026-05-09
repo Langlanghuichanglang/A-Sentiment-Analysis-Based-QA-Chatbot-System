@@ -20,14 +20,12 @@ from langgraph.store.postgres import PostgresStore
 from langgraph.store.base import BaseStore
 
 from langgraph.prebuilt import ToolNode
-
 # from langchain_community.tools import DuckDuckGoSearchRun
 
 
-SESSION_SUMMARY_EVERY = 5  # 每隔多少轮触发一次 session 摘要
-PROFILE_UPDATE_EVERY = 3  # 每隔多少轮触发一次 profile 更新
+SESSION_SUMMARY_EVERY = 5   # 每隔多少轮触发一次 session 摘要
+PROFILE_UPDATE_EVERY  = 3    # 每隔多少轮触发一次 profile 更新
 RECENT_MESSAGES_LIMIT = 5
-
 
 # tools
 @tool
@@ -39,24 +37,22 @@ def get_weather(city: str) -> str:
         "上海": "多云，22°C，有轻微霾",
         "深圳": "雷阵雨，28°C，湿度较高",
     }
-    return fake_data.get(city, f"{city}：数据暂无")  # get(key, default) 如果 key 不存在，返回 default
-
+    return fake_data.get(city, f"{city}：数据暂无") # get(key, default) 如果 key 不存在，返回 default
 
 @tool
 def get_mbti_score(text: str) -> dict:
     """分析文本的 MBTI 人格类型倾向"""
     # mock
     return {
-        "I": 0.7,  # 内向
-        "E": 0.3,  # 外向
-        "S": 0.4,  # 实感
-        "N": 0.6,  # 直觉
-        "T": 0.5,  # 思考
-        "F": 0.5,  # 情感
-        "J": 0.8,  # 判断
-        "P": 0.2,  # 知觉
+        "I": 0.7, # 内向
+        "E": 0.3, # 外向
+        "S": 0.4, # 实感
+        "N": 0.6, # 直觉
+        "T": 0.5, # 思考
+        "F": 0.5, # 情感
+        "J": 0.8, # 判断
+        "P": 0.2, # 知觉
     }
-
 
 # search = TavilySearchResults(max_results=3)
 
@@ -68,8 +64,8 @@ _llm_base = ChatOpenAI(
     api_key=os.environ.get('DEEPSEEK_API_KEY'),
     base_url="https://api.deepseek.com",
 )
-model = _llm_base.bind_tools(tools)  # 绑定工具的模型，用于正常对话和工具调用
-llm_plain = _llm_base  # 不绑定工具的模型，用于画像更新时
+model = _llm_base.bind_tools(tools) # 绑定工具的模型，用于正常对话和工具调用
+llm_plain = _llm_base # 不绑定工具的模型，用于画像更新时
 
 
 # memory
@@ -120,7 +116,7 @@ class MBTIScores(BaseModel):
         current = self.model_dump()
 
         def weighted(old: float, new_val: float | None) -> float:
-            if new_val is None:  # 缺少的字段会是None
+            if new_val is None: # 缺少的字段会是None
                 return old
             return round(old * (1 - weight) + new_val * weight, 3)
 
@@ -141,9 +137,9 @@ class UserProfile(BaseModel):
     user_id: str
     text_summary: str = ""
     mbti_scores: MBTIScores = Field(default_factory=MBTIScores)
-    traits: list[str] = Field(default_factory=list)  # 观察到的性格特质
-    conversation_count: int = 0  # 累计对话轮次
-    last_updated: str = ""  # ISO 时间戳
+    traits: list[str] = Field(default_factory=list) # 观察到的性格特质
+    conversation_count: int = 0 # 累计对话轮次
+    last_updated: str = "" # ISO 时间戳
 
     def to_store_value(self) -> dict:
         """存入 Store 时序列化"""
@@ -154,7 +150,6 @@ class UserProfile(BaseModel):
         """从 Store 读出时反序列化"""
         return cls.model_validate(data)
 
-
 def _get_profile(store: BaseStore, user_id: str) -> UserProfile:
     namespace = ("data", user_id)
     item = store.get(namespace, "profile")
@@ -162,12 +157,10 @@ def _get_profile(store: BaseStore, user_id: str) -> UserProfile:
         return UserProfile.from_store_value(item.value)
     return UserProfile(user_id=user_id)
 
-
 def _save_profile(store: BaseStore, profile: UserProfile):
     profile.last_updated = datetime.now().isoformat()
     namespace = ("data", profile.user_id)
     store.put(namespace, "profile", profile.to_store_value())
-
 
 def _get_all_facts(store: BaseStore, user_id: str) -> dict:
     """返回 {fact_key: fact_value_dict} 的字典"""
@@ -177,11 +170,9 @@ def _get_all_facts(store: BaseStore, user_id: str) -> dict:
         return item.value
     return {}
 
-
 def _save_facts(store: BaseStore, user_id: str, facts: dict):
     namespace = ("data", user_id)
     store.put(namespace, "facts", facts)
-
 
 def _get_summaries(store: BaseStore, user_id: str) -> dict:
     namespace = ("data", user_id)
@@ -190,11 +181,9 @@ def _get_summaries(store: BaseStore, user_id: str) -> dict:
         return item.value
     return {"sessions": {}}
 
-
 def _save_summaries(store: BaseStore, user_id: str, summaries: dict):
     namespace = ("data", user_id)
     store.put(namespace, "summaries", summaries)
-
 
 def _get_latest_summary(store: BaseStore, user_id: str) -> str:
     """优先取 weekly 压缩摘要，没有就返回空"""
@@ -215,20 +204,20 @@ def _extract_dialogue(messages: list[BaseMessage]) -> str:
 
 
 def _build_system_prompt(
-        profile: UserProfile,
-        facts: dict,
-        # weekly_summary: str,
+    profile: UserProfile,
+    facts: dict,
+    # weekly_summary: str,
 ) -> str:
     parts = [
         "你是一个擅长观察人格的助理，同时也能回答日常问题。",
         "你会在对话中自然地观察用户的性格倾向（MBTI 维度：E/I、S/N、T/F、J/P），持续更新对用户的认知画像，但不要直接给用户贴标签，除非用户主动询问。",
-
+        
         "你的核心价值是帮助用户进行思维扩充：",
         "1. 识别用户当前的思考风格和可能存在的认知盲区后，主动提供互补视角（尤其是用户较弱的维度）。",
         "2. 对于重要决策、问题分析、创意生成等，主动给出『用户当前倾向视角』 + 『互补视角』的对比分析，帮助用户看到更完整的光谱。",
         "3. 不要模仿用户的思考风格，而是刻意引入差异化思考（例如用户偏直觉时，你补充具体事实与执行细节；用户偏理性时，你补充人际与情感影响）。",
         "4. 定期或在合适时机，帮助用户反思：『这个结论是否受到了某种性格偏好的影响？还有其他角度吗？』",
-
+        
         "回答时保持自然、专业且有洞察力。不要每句都提性格，只在有明显价值时自然融入。",
         "始终以『帮助用户更好地思考和决策』为目标，而非单纯诊断人格。",
     ]
@@ -257,9 +246,10 @@ def _build_system_prompt(
     return "\n".join(parts)
 
 
+
 def add_messages_dedupe_system(
-        existing: list[BaseMessage],
-        new: list[BaseMessage],
+    existing: list[BaseMessage],
+    new: list[BaseMessage],
 ) -> list[BaseMessage]:
     merged = add_messages(existing, new)
     last_system: SystemMessage | None = None
@@ -281,8 +271,7 @@ class AgentState(TypedDict):
     user_id: str
     session_id: str
     turn_count: int
-    session_summary: str  # session 长期记忆
-
+    session_summary: str # session 长期记忆
 
 ## nodes
 
@@ -304,11 +293,10 @@ def load_profile(state: AgentState, *, store: BaseStore) -> AgentState:
         # 每次注入 system 时，reducer 只保留最新一条 system
     }
 
-
 def reflection(state: AgentState, *, store: BaseStore) -> AgentState:
-    user_id = state["user_id"]
-    session_id = state["session_id"]
-    turn_count = state.get("turn_count", 0)
+    user_id         = state["user_id"]
+    session_id      = state["session_id"]
+    turn_count      = state.get("turn_count", 0)
     session_summary = state.get("session_summary", "")
 
     dialogue = _extract_dialogue(state["messages"])
@@ -383,10 +371,10 @@ def _maybe_update_facts(store: BaseStore, user_id: str, dialogue: str):
                 continue
             new_conf = fact_data.get("confidence", 0.5)
 
-            # 已有同 key 时，只在新置信度更高时覆盖
+            # 同key，已有事实且新事实置信度更低，跳过
             if key in existing:
                 old_conf = existing[key].get("confidence", 0.5)
-                if new_conf <= old_conf:
+                if new_conf < old_conf:
                     continue
 
             existing[key] = {
@@ -405,7 +393,7 @@ def _maybe_update_facts(store: BaseStore, user_id: str, dialogue: str):
 
 
 def _update_profile(
-        store: BaseStore, user_id: str, profile: UserProfile, dialogue: str
+    store: BaseStore, user_id: str, profile: UserProfile, dialogue: str
 ):
     """
     让 LLM 根据对话更新画像摘要、MBTI 评分和性格特质。
@@ -457,7 +445,7 @@ def _update_profile(
         if isinstance(new_traits, list) and new_traits:
             profile.traits = list(set(profile.traits + new_traits))
             print(f"  [profile] 新增特质：{new_traits}")
-
+        
         if isinstance(mbti_update, dict) and mbti_update:
             profile.mbti_scores = profile.mbti_scores.partial_merge(mbti_update, weight=0.25)
             print(
@@ -502,7 +490,6 @@ def _summarize_session(dialogue: str, existing_summary: str) -> str:
         print(f"  [session_summary] 摘要更新失败，保留旧摘要：{e}")
         return existing_summary
 
-
 def call_model_0(state: AgentState) -> AgentState:
     """
     调用模型，得到回复后更新状态
@@ -510,8 +497,7 @@ def call_model_0(state: AgentState) -> AgentState:
     输出：更新后的状态（包含新回复）
     """
     response = model.invoke(state["messages"])
-    return {"messages": [response]}  # 返回的状态只包含新消息，add_messages 把它附加到现有历史中
-
+    return {"messages": [response]} # 返回的状态只包含新消息，add_messages 把它附加到现有历史中
 
 def call_model(state: AgentState) -> AgentState:
     messages = state["messages"]
@@ -519,7 +505,7 @@ def call_model(state: AgentState) -> AgentState:
 
     # 分离 system 和对话消息
     system_msgs = [m for m in messages if isinstance(m, SystemMessage)]
-    non_system = [m for m in messages if not isinstance(m, SystemMessage)]
+    non_system  = [m for m in messages if not isinstance(m, SystemMessage)]
 
     # 只取最近 N 条对话
     recent = non_system[-RECENT_MESSAGES_LIMIT:]
@@ -537,8 +523,8 @@ def call_model(state: AgentState) -> AgentState:
     response = model.invoke(to_send)
     return {"messages": [response]}
 
-
 tool_node = ToolNode(tools)
+
 
 
 ## edges
@@ -548,8 +534,8 @@ def should_continue(state: AgentState) -> str:
     判断模型回复后下一步走哪里
     如果模型回复里包含 tool_calls，说明它想用工具，就走 "tools" 节点
     """
-    last_message = state["messages"][-1]  # messages 是一个列表，[-1] 取最后一条，也就是模型刚产生的回复
-    if last_message.tool_calls:  # 如果最后一条消息是工具调用消息，并且里面确实有工具调用，那就去执行工具
+    last_message = state["messages"][-1] # messages 是一个列表，[-1] 取最后一条，也就是模型刚产生的回复
+    if last_message.tool_calls: # 如果最后一条消息是工具调用消息，并且里面确实有工具调用，那就去执行工具
         return "tools"
     return "end"
 
@@ -563,39 +549,39 @@ graph.add_node("call_tools", tool_node)
 graph.add_node("load_profile", load_profile)
 graph.add_node("reflection", reflection)
 
-## 添加边
+## 添加边 
 
-graph.add_edge(START, "load_profile")  # 从 START 进入 load_profile 节点
-graph.add_edge("load_profile", "call_model")  # 从 load_profile 进入 call_model 节点
+graph.add_edge(START, "load_profile") # 从 START 进入 load_profile 节点
+graph.add_edge("load_profile", "call_model") # 从 load_profile 进入 call_model 节点
 
 ### 条件边 动态路由
 graph.add_conditional_edges(
     "call_model",
-    should_continue,  # 根据模型回复判断下一步走哪里
+    should_continue, # 根据模型回复判断下一步走哪里
     {
-        "tools": "call_tools",  # 如果 should_continue 返回 "tools"，就走 call_tools 节点
-        "end": "reflection",  # 如果 should_continue 返回 "end"，就进入 reflection_node 节点
+        "tools": "call_tools", # 如果 should_continue 返回 "tools"，就走 call_tools 节点
+        "end": "reflection", # 如果 should_continue 返回 "end"，就进入 reflection_node 节点
     }
 )
 graph.add_edge("reflection", END)
 
 ### 循环
-graph.add_edge("call_tools", "call_model")  # 执行完工具后，回到 call_model 节点让模型观察工具结果并总结, 有可能继续调用工具
+graph.add_edge("call_tools", "call_model") # 执行完工具后，回到 call_model 节点让模型观察工具结果并总结, 有可能继续调用工具
 
 
 def chat_loop():
     # 模拟用户和会话
     user_id = "user_059"
-    session_id = "chat_profiletest_004"
-    config = {"configurable": {"thread_id": f"{user_id}_{session_id}"}}  # thread_id 为会话id
+    session_id = "chat_profiletest_005"
+    config = {"configurable": {"thread_id": f"{user_id}_{session_id}"}} # thread_id 为会话id
 
     # store = InMemoryStore()   # temp store
     DB_URL = "postgresql://neondb_owner:npg_TwzFbQy56nAs@ep-misty-meadow-ao6s5bk7.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&options=endpoint%3Dep-misty-meadow-ao6s5bk7"
 
     # SqliteSaver.from_conn_string 返回的是上下文管理器，需要在 with 中获取真正的 saver 实例
-    with SqliteSaver.from_conn_string("./checkpoints.db") as memory:  # 用sqlite作为memory
+    with SqliteSaver.from_conn_string("./checkpoints.db") as memory: # 用sqlite作为memory
 
-        with PostgresStore.from_conn_string(DB_URL) as store:  # 用postgres作为store
+        with PostgresStore.from_conn_string(DB_URL) as store: # 用postgres作为store
             store.setup()  # 初始化 store 表结构（只需首次，重复调用安全）
             app = graph.compile(
                 checkpointer=memory,
@@ -604,7 +590,8 @@ def chat_loop():
 
             print("AI: 你好！我是你的助理。输入 'quit' 或 'exit' 退出对话。\n")
 
-            is_first_run = True
+            existing_state = app.get_state(config)
+            is_new_session = not existing_state.values 
 
             # chat
             while True:
@@ -620,16 +607,20 @@ def chat_loop():
                 if user_input.lower() == "facts":
                     _print_facts(store, user_id)
                     continue
+                if user_input.lower() in ["sy", "summary"]:
+                    _print_session_summary(app, config)
+                    continue
 
                 input_message = {
                     "messages": [HumanMessage(content=user_input)],
                     "user_id": user_id,
                     "session_id": session_id,
                 }
-                if is_first_run:
+
+                if is_new_session:
                     input_message["turn_count"] = 0
                     input_message["session_summary"] = ""
-                    is_first_run = False
+                    is_new_session = False
 
                 # 调用时传入 config
                 # 这里不需要手动把之前的历史传进去，LangGraph 会根据 thread_id 自动从 memory 中加载历史
@@ -640,14 +631,13 @@ def chat_loop():
                 # stream mode
                 for event in app.stream(input_message, config=config):
                     for event_name, value in event.items():
-                        print(f"\n{'-' * 20} Node: {event_name} {'-' * 20}\n")
+                        print(f"\n{'-'*20} Node: {event_name} {'-'*20}\n")
                         if not value or "messages" not in value:
                             print("(no messages)")
                             continue
 
                         last_message = value["messages"][-1]
                         print(last_message.content or f"Calling Tool: {last_message.tool_calls}")
-
 
 # debug
 def _print_profile(store: BaseStore, user_id: str):
@@ -673,6 +663,14 @@ def _print_facts(store: BaseStore, user_id: str):
         conf = v.get("confidence", "?") if isinstance(v, dict) else "?"
         print(f"  {k}: {val}  (置信度 {conf})")
 
+
+def _print_session_summary(app, config):
+    state = app.get_state(config)
+    summary = ""
+    if state and getattr(state, "values", None):
+        summary = state.values.get("session_summary", "")
+    print("\n─── 当前 Session Summary ───")
+    print(summary or "（暂无）")
 
 if __name__ == "__main__":
     chat_loop()
